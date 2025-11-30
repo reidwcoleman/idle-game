@@ -1,1 +1,849 @@
-<iframe src="https://claude.site/public/artifacts/d67100e8-16fa-482c-9081-2562b7881f5f/embed" title="Claude Artifact" width="100%" height="600" frameborder="0" allow="clipboard-write" allowfullscreen></iframe>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TeamUp - Youth Soccer Team Manager</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Sample data
+    const initialTeamData = {
+      name: "Lightning FC U10",
+      season: "Fall 2024",
+      coach: "Coach Martinez",
+      assistantCoach: "Coach Williams"
+    };
+
+    const initialPlayers = [
+      { id: 1, name: "Emma Johnson", number: 7, position: "Forward", parent: "Sarah Johnson", phone: "(555) 123-4567", email: "sarah.j@email.com" },
+      { id: 2, name: "Liam Smith", number: 10, position: "Midfielder", parent: "Mike Smith", phone: "(555) 234-5678", email: "mike.s@email.com" },
+      { id: 3, name: "Olivia Brown", number: 3, position: "Defender", parent: "Lisa Brown", phone: "(555) 345-6789", email: "lisa.b@email.com" },
+      { id: 4, name: "Noah Davis", number: 1, position: "Goalkeeper", parent: "Tom Davis", phone: "(555) 456-7890", email: "tom.d@email.com" },
+      { id: 5, name: "Ava Wilson", number: 11, position: "Forward", parent: "Karen Wilson", phone: "(555) 567-8901", email: "karen.w@email.com" },
+      { id: 6, name: "Mason Garcia", number: 5, position: "Midfielder", parent: "Rosa Garcia", phone: "(555) 678-9012", email: "rosa.g@email.com" },
+      { id: 7, name: "Sophia Martinez", number: 8, position: "Midfielder", parent: "Carlos Martinez", phone: "(555) 789-0123", email: "carlos.m@email.com" },
+      { id: 8, name: "Lucas Anderson", number: 2, position: "Defender", parent: "Jenny Anderson", phone: "(555) 890-1234", email: "jenny.a@email.com" },
+      { id: 9, name: "Isabella Thomas", number: 9, position: "Forward", parent: "David Thomas", phone: "(555) 901-2345", email: "david.t@email.com" },
+      { id: 10, name: "Ethan Lee", number: 4, position: "Defender", parent: "Susan Lee", phone: "(555) 012-3456", email: "susan.l@email.com" },
+    ];
+
+    const initialSchedule = [
+      { id: 1, type: "practice", date: "2024-11-05", time: "5:00 PM", location: "Riverside Park Field 2", opponent: null },
+      { id: 2, type: "game", date: "2024-11-09", time: "10:00 AM", location: "Central Sports Complex", opponent: "Thunder FC" },
+      { id: 3, type: "practice", date: "2024-11-12", time: "5:00 PM", location: "Riverside Park Field 2", opponent: null },
+      { id: 4, type: "game", date: "2024-11-16", time: "2:00 PM", location: "Westside Fields", opponent: "Eagles United" },
+      { id: 5, type: "practice", date: "2024-11-19", time: "5:00 PM", location: "Riverside Park Field 2", opponent: null },
+      { id: 6, type: "game", date: "2024-11-23", time: "11:00 AM", location: "Home - Riverside Park", opponent: "Storm SC" },
+    ];
+
+    const initialCarpools = [
+      { id: 1, eventId: 2, driver: "Sarah Johnson", seats: 4, passengers: ["Liam Smith", "Olivia Brown", "Noah Davis"] },
+      { id: 2, eventId: 2, driver: "Mike Smith", seats: 3, passengers: ["Ava Wilson", "Mason Garcia"] },
+      { id: 3, eventId: 4, driver: "Lisa Brown", seats: 4, passengers: ["Emma Johnson", "Sophia Martinez", "Lucas Anderson"] },
+    ];
+
+    const initialVolunteerDuties = [
+      { id: 1, eventId: 2, duty: "Snacks", volunteer: "Karen Wilson", notes: "Orange slices and water bottles" },
+      { id: 2, eventId: 2, duty: "Team Mom/Dad", volunteer: "Tom Davis", notes: "Coordinate arrival times" },
+      { id: 3, eventId: 4, duty: "Snacks", volunteer: "Rosa Garcia", notes: "Granola bars and juice boxes" },
+      { id: 4, eventId: 4, duty: "Team Mom/Dad", volunteer: "Carlos Martinez", notes: "" },
+      { id: 5, eventId: 6, duty: "Snacks", volunteer: null, notes: "Need volunteer!" },
+      { id: 6, eventId: 6, duty: "Team Mom/Dad", volunteer: null, notes: "Need volunteer!" },
+    ];
+
+    // Icons
+    const Icons = {
+      dashboard: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>,
+      calendar: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
+      car: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h8m-8 5h8m-4-9l-2 3h4l-2-3zM5 17h14a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2zm2 2a2 2 0 100-4 2 2 0 000 4zm10 0a2 2 0 100-4 2 2 0 000 4z" /></svg>,
+      volunteer: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>,
+      roster: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>,
+      soccer: <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2"/><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 2a8 8 0 018 8 8 8 0 01-8 8 8 8 0 01-8-8 8 8 0 018-8z" fill="none"/><polygon points="12,7 14.5,10.5 12,14 9.5,10.5" fill="currentColor"/></svg>,
+      plus: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>,
+      check: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>,
+      warning: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>,
+    };
+
+    // Navigation Component
+    function Navigation({ currentPage, setCurrentPage }) {
+      const navItems = [
+        { id: 'dashboard', label: 'Dashboard', icon: Icons.dashboard },
+        { id: 'schedule', label: 'Schedule', icon: Icons.calendar },
+        { id: 'carpool', label: 'Carpool', icon: Icons.car },
+        { id: 'volunteers', label: 'Volunteers', icon: Icons.volunteer },
+        { id: 'roster', label: 'Roster', icon: Icons.roster },
+      ];
+
+      return (
+        <nav className="bg-green-700 text-white shadow-lg">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center space-x-3">
+                <div className="text-green-200">{Icons.soccer}</div>
+                <span className="font-bold text-xl">TeamUp</span>
+              </div>
+              <div className="hidden md:flex space-x-1">
+                {navItems.map(item => (
+                  <button
+                    key={item.id}
+                    onClick={() => setCurrentPage(item.id)}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition ${
+                      currentPage === item.id
+                        ? 'bg-green-600 text-white'
+                        : 'text-green-100 hover:bg-green-600'
+                    }`}
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          {/* Mobile nav */}
+          <div className="md:hidden flex justify-around py-2 border-t border-green-600">
+            {navItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => setCurrentPage(item.id)}
+                className={`flex flex-col items-center p-2 rounded ${
+                  currentPage === item.id ? 'text-white' : 'text-green-200'
+                }`}
+              >
+                {item.icon}
+                <span className="text-xs mt-1">{item.label}</span>
+              </button>
+            ))}
+          </div>
+        </nav>
+      );
+    }
+
+    // Dashboard Component
+    function Dashboard({ team, schedule, carpools, volunteers, players }) {
+      const upcomingEvents = schedule.slice(0, 3);
+      const needsVolunteers = volunteers.filter(v => !v.volunteer).length;
+      const nextGame = schedule.find(e => e.type === 'game');
+
+      return (
+        <div className="space-y-6">
+          <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-6 text-white">
+            <h1 className="text-2xl font-bold">{team.name}</h1>
+            <p className="text-green-100">{team.season}</p>
+            <div className="mt-4 flex flex-wrap gap-4 text-sm">
+              <span className="bg-green-500 px-3 py-1 rounded-full">{team.coach}</span>
+              <span className="bg-green-500 px-3 py-1 rounded-full">{team.assistantCoach}</span>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+              <div className="flex items-center justify-between">
+                <h3 className="text-gray-500 text-sm font-medium">Players</h3>
+                <span className="text-green-600">{Icons.roster}</span>
+              </div>
+              <p className="text-3xl font-bold mt-2">{players.length}</p>
+            </div>
+            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+              <div className="flex items-center justify-between">
+                <h3 className="text-gray-500 text-sm font-medium">Upcoming Events</h3>
+                <span className="text-blue-600">{Icons.calendar}</span>
+              </div>
+              <p className="text-3xl font-bold mt-2">{schedule.length}</p>
+            </div>
+            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+              <div className="flex items-center justify-between">
+                <h3 className="text-gray-500 text-sm font-medium">Volunteer Gaps</h3>
+                <span className={needsVolunteers > 0 ? "text-orange-500" : "text-green-600"}>
+                  {needsVolunteers > 0 ? Icons.warning : Icons.check}
+                </span>
+              </div>
+              <p className="text-3xl font-bold mt-2">{needsVolunteers}</p>
+            </div>
+          </div>
+
+          {nextGame && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <h2 className="text-lg font-semibold mb-4">Next Game</h2>
+              <div className="flex flex-col md:flex-row md:items-center justify-between">
+                <div>
+                  <p className="text-xl font-bold text-green-700">vs {nextGame.opponent}</p>
+                  <p className="text-gray-600">{new Date(nextGame.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                  <p className="text-gray-500">{nextGame.time} @ {nextGame.location}</p>
+                </div>
+                <div className="mt-4 md:mt-0 flex space-x-2">
+                  <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                    View Details
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <h2 className="text-lg font-semibold mb-4">Upcoming Schedule</h2>
+            <div className="space-y-3">
+              {upcomingEvents.map(event => (
+                <div key={event.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-3 h-3 rounded-full ${event.type === 'game' ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+                    <div>
+                      <p className="font-medium">{event.type === 'game' ? `Game vs ${event.opponent}` : 'Practice'}</p>
+                      <p className="text-sm text-gray-500">{event.location}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium">{new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                    <p className="text-sm text-gray-500">{event.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Schedule Component
+    function Schedule({ schedule, setSchedule }) {
+      const [showAddForm, setShowAddForm] = useState(false);
+      const [newEvent, setNewEvent] = useState({ type: 'practice', date: '', time: '', location: '', opponent: '' });
+
+      const handleAddEvent = () => {
+        if (newEvent.date && newEvent.time && newEvent.location) {
+          setSchedule([...schedule, { ...newEvent, id: Date.now() }]);
+          setNewEvent({ type: 'practice', date: '', time: '', location: '', opponent: '' });
+          setShowAddForm(false);
+        }
+      };
+
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold text-gray-800">Schedule</h1>
+            <button
+              onClick={() => setShowAddForm(!showAddForm)}
+              className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+            >
+              {Icons.plus}
+              <span>Add Event</span>
+            </button>
+          </div>
+
+          {showAddForm && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <h3 className="font-semibold mb-4">Add New Event</h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                  <select
+                    value={newEvent.type}
+                    onChange={(e) => setNewEvent({...newEvent, type: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  >
+                    <option value="practice">Practice</option>
+                    <option value="game">Game</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                  <input
+                    type="date"
+                    value={newEvent.date}
+                    onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                  <input
+                    type="time"
+                    value={newEvent.time}
+                    onChange={(e) => setNewEvent({...newEvent, time: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                  <input
+                    type="text"
+                    value={newEvent.location}
+                    onChange={(e) => setNewEvent({...newEvent, location: e.target.value})}
+                    placeholder="Field name or address"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+                {newEvent.type === 'game' && (
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Opponent</label>
+                    <input
+                      type="text"
+                      value={newEvent.opponent}
+                      onChange={(e) => setNewEvent({...newEvent, opponent: e.target.value})}
+                      placeholder="Opposing team name"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="mt-4 flex space-x-2">
+                <button
+                  onClick={handleAddEvent}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                >
+                  Save Event
+                </button>
+                <button
+                  onClick={() => setShowAddForm(false)}
+                  className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="grid grid-cols-4 bg-gray-50 p-4 font-medium text-gray-600 text-sm">
+              <div>Event</div>
+              <div>Date & Time</div>
+              <div>Location</div>
+              <div>Actions</div>
+            </div>
+            {schedule.map(event => (
+              <div key={event.id} className="grid grid-cols-4 p-4 border-t border-gray-100 items-center">
+                <div className="flex items-center space-x-3">
+                  <div className={`w-3 h-3 rounded-full ${event.type === 'game' ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+                  <div>
+                    <p className="font-medium">{event.type === 'game' ? 'Game' : 'Practice'}</p>
+                    {event.opponent && <p className="text-sm text-gray-500">vs {event.opponent}</p>}
+                  </div>
+                </div>
+                <div>
+                  <p>{new Date(event.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</p>
+                  <p className="text-sm text-gray-500">{event.time}</p>
+                </div>
+                <div className="text-gray-600">{event.location}</div>
+                <div>
+                  <button
+                    onClick={() => setSchedule(schedule.filter(e => e.id !== event.id))}
+                    className="text-red-600 hover:text-red-700 text-sm"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // Carpool Component
+    function Carpool({ schedule, carpools, setCarpools, players }) {
+      const [selectedEvent, setSelectedEvent] = useState(null);
+      const [showAddForm, setShowAddForm] = useState(false);
+      const [newCarpool, setNewCarpool] = useState({ driver: '', seats: 4, passengers: [] });
+
+      const games = schedule.filter(e => e.type === 'game');
+      const eventCarpools = selectedEvent ? carpools.filter(c => c.eventId === selectedEvent) : [];
+
+      const handleAddCarpool = () => {
+        if (newCarpool.driver && selectedEvent) {
+          setCarpools([...carpools, { ...newCarpool, id: Date.now(), eventId: selectedEvent }]);
+          setNewCarpool({ driver: '', seats: 4, passengers: [] });
+          setShowAddForm(false);
+        }
+      };
+
+      const handleAddPassenger = (carpoolId, playerName) => {
+        setCarpools(carpools.map(c => {
+          if (c.id === carpoolId && c.passengers.length < c.seats) {
+            return { ...c, passengers: [...c.passengers, playerName] };
+          }
+          return c;
+        }));
+      };
+
+      const handleRemovePassenger = (carpoolId, playerName) => {
+        setCarpools(carpools.map(c => {
+          if (c.id === carpoolId) {
+            return { ...c, passengers: c.passengers.filter(p => p !== playerName) };
+          }
+          return c;
+        }));
+      };
+
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold text-gray-800">Carpool Coordination</h1>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Select Game</label>
+            <select
+              value={selectedEvent || ''}
+              onChange={(e) => setSelectedEvent(Number(e.target.value))}
+              className="w-full md:w-1/2 border border-gray-300 rounded-lg px-3 py-2"
+            >
+              <option value="">Choose a game...</option>
+              {games.map(game => (
+                <option key={game.id} value={game.id}>
+                  {new Date(game.date).toLocaleDateString()} - vs {game.opponent} @ {game.location}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {selectedEvent && (
+            <>
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-semibold">Carpool Groups</h2>
+                <button
+                  onClick={() => setShowAddForm(!showAddForm)}
+                  className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                >
+                  {Icons.plus}
+                  <span>Offer Ride</span>
+                </button>
+              </div>
+
+              {showAddForm && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                  <h3 className="font-semibold mb-4">Offer a Ride</h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Driver (Parent Name)</label>
+                      <input
+                        type="text"
+                        value={newCarpool.driver}
+                        onChange={(e) => setNewCarpool({...newCarpool, driver: e.target.value})}
+                        placeholder="Your name"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Available Seats</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="7"
+                        value={newCarpool.seats}
+                        onChange={(e) => setNewCarpool({...newCarpool, seats: parseInt(e.target.value)})}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex space-x-2">
+                    <button onClick={handleAddCarpool} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                      Add Ride
+                    </button>
+                    <button onClick={() => setShowAddForm(false)} className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid md:grid-cols-2 gap-4">
+                {eventCarpools.map(carpool => (
+                  <div key={carpool.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                          {Icons.car}
+                        </div>
+                        <div>
+                          <p className="font-semibold">{carpool.driver}</p>
+                          <p className="text-sm text-gray-500">{carpool.passengers.length}/{carpool.seats} seats filled</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setCarpools(carpools.filter(c => c.id !== carpool.id))}
+                        className="text-red-500 text-sm"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      {carpool.passengers.map((passenger, idx) => (
+                        <div key={idx} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded">
+                          <span>{passenger}</span>
+                          <button
+                            onClick={() => handleRemovePassenger(carpool.id, passenger)}
+                            className="text-red-500 text-sm"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                      {carpool.passengers.length < carpool.seats && (
+                        <select
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              handleAddPassenger(carpool.id, e.target.value);
+                              e.target.value = '';
+                            }
+                          }}
+                          className="w-full border border-dashed border-gray-300 rounded px-3 py-2 text-gray-500"
+                        >
+                          <option value="">+ Add passenger</option>
+                          {players
+                            .filter(p => !carpool.passengers.includes(p.name))
+                            .map(p => (
+                              <option key={p.id} value={p.name}>{p.name}</option>
+                            ))
+                          }
+                        </select>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {eventCarpools.length === 0 && (
+                  <div className="md:col-span-2 bg-gray-50 rounded-xl p-8 text-center text-gray-500">
+                    No carpool groups yet. Click "Offer Ride" to get started!
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      );
+    }
+
+    // Volunteers Component
+    function Volunteers({ schedule, volunteers, setVolunteers, players }) {
+      const [selectedEvent, setSelectedEvent] = useState(null);
+
+      const games = schedule.filter(e => e.type === 'game');
+      const eventVolunteers = selectedEvent ? volunteers.filter(v => v.eventId === selectedEvent) : [];
+
+      const handleVolunteer = (dutyId, volunteerName) => {
+        setVolunteers(volunteers.map(v => {
+          if (v.id === dutyId) {
+            return { ...v, volunteer: volunteerName };
+          }
+          return v;
+        }));
+      };
+
+      const addDuty = (duty) => {
+        if (selectedEvent) {
+          setVolunteers([...volunteers, { id: Date.now(), eventId: selectedEvent, duty, volunteer: null, notes: '' }]);
+        }
+      };
+
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold text-gray-800">Volunteer Duties</h1>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Select Game</label>
+            <select
+              value={selectedEvent || ''}
+              onChange={(e) => setSelectedEvent(Number(e.target.value))}
+              className="w-full md:w-1/2 border border-gray-300 rounded-lg px-3 py-2"
+            >
+              <option value="">Choose a game...</option>
+              {games.map(game => (
+                <option key={game.id} value={game.id}>
+                  {new Date(game.date).toLocaleDateString()} - vs {game.opponent}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {selectedEvent && (
+            <>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => addDuty('Snacks')} className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm hover:bg-orange-200">
+                  + Add Snacks Duty
+                </button>
+                <button onClick={() => addDuty('Team Mom/Dad')} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm hover:bg-blue-200">
+                  + Add Team Parent
+                </button>
+                <button onClick={() => addDuty('Referee')} className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm hover:bg-purple-200">
+                  + Add Referee
+                </button>
+                <button onClick={() => addDuty('Equipment')} className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm hover:bg-green-200">
+                  + Add Equipment Manager
+                </button>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                {eventVolunteers.map(duty => (
+                  <div
+                    key={duty.id}
+                    className={`bg-white rounded-xl p-5 shadow-sm border ${duty.volunteer ? 'border-green-200' : 'border-orange-200'}`}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        duty.duty === 'Snacks' ? 'bg-orange-100 text-orange-700' :
+                        duty.duty === 'Team Mom/Dad' ? 'bg-blue-100 text-blue-700' :
+                        duty.duty === 'Referee' ? 'bg-purple-100 text-purple-700' :
+                        'bg-green-100 text-green-700'
+                      }`}>
+                        {duty.duty}
+                      </span>
+                      <button
+                        onClick={() => setVolunteers(volunteers.filter(v => v.id !== duty.id))}
+                        className="text-gray-400 hover:text-red-500"
+                      >
+                        &times;
+                      </button>
+                    </div>
+
+                    {duty.volunteer ? (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-green-600">{Icons.check}</span>
+                          <span className="font-medium">{duty.volunteer}</span>
+                        </div>
+                        <button
+                          onClick={() => handleVolunteer(duty.id, null)}
+                          className="text-sm text-gray-500 hover:text-red-500"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="flex items-center space-x-2 text-orange-600 mb-2">
+                          {Icons.warning}
+                          <span className="text-sm">Needs volunteer!</span>
+                        </div>
+                        <select
+                          onChange={(e) => {
+                            if (e.target.value) handleVolunteer(duty.id, e.target.value);
+                          }}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                        >
+                          <option value="">Select volunteer...</option>
+                          {players.map(p => (
+                            <option key={p.id} value={p.parent}>{p.parent}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {duty.notes && (
+                      <p className="mt-3 text-sm text-gray-500 italic">{duty.notes}</p>
+                    )}
+                  </div>
+                ))}
+                {eventVolunteers.length === 0 && (
+                  <div className="md:col-span-2 bg-gray-50 rounded-xl p-8 text-center text-gray-500">
+                    No duties assigned yet. Use the buttons above to add volunteer duties.
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      );
+    }
+
+    // Roster Component
+    function Roster({ players, setPlayers }) {
+      const [showAddForm, setShowAddForm] = useState(false);
+      const [newPlayer, setNewPlayer] = useState({ name: '', number: '', position: 'Midfielder', parent: '', phone: '', email: '' });
+      const [searchTerm, setSearchTerm] = useState('');
+
+      const handleAddPlayer = () => {
+        if (newPlayer.name && newPlayer.parent) {
+          setPlayers([...players, { ...newPlayer, id: Date.now(), number: parseInt(newPlayer.number) || 0 }]);
+          setNewPlayer({ name: '', number: '', position: 'Midfielder', parent: '', phone: '', email: '' });
+          setShowAddForm(false);
+        }
+      };
+
+      const filteredPlayers = players.filter(p =>
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.parent.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+      return (
+        <div className="space-y-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <h1 className="text-2xl font-bold text-gray-800">Team Roster</h1>
+            <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+              <input
+                type="text"
+                placeholder="Search players or parents..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="border border-gray-300 rounded-lg px-4 py-2 w-full md:w-64"
+              />
+              <button
+                onClick={() => setShowAddForm(!showAddForm)}
+                className="flex items-center justify-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+              >
+                {Icons.plus}
+                <span>Add Player</span>
+              </button>
+            </div>
+          </div>
+
+          {showAddForm && (
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <h3 className="font-semibold mb-4">Add New Player</h3>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Player Name</label>
+                  <input
+                    type="text"
+                    value={newPlayer.name}
+                    onChange={(e) => setNewPlayer({...newPlayer, name: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Jersey Number</label>
+                  <input
+                    type="number"
+                    value={newPlayer.number}
+                    onChange={(e) => setNewPlayer({...newPlayer, number: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                  <select
+                    value={newPlayer.position}
+                    onChange={(e) => setNewPlayer({...newPlayer, position: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  >
+                    <option>Goalkeeper</option>
+                    <option>Defender</option>
+                    <option>Midfielder</option>
+                    <option>Forward</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Parent/Guardian Name</label>
+                  <input
+                    type="text"
+                    value={newPlayer.parent}
+                    onChange={(e) => setNewPlayer({...newPlayer, parent: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <input
+                    type="tel"
+                    value={newPlayer.phone}
+                    onChange={(e) => setNewPlayer({...newPlayer, phone: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={newPlayer.email}
+                    onChange={(e) => setNewPlayer({...newPlayer, email: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+              </div>
+              <div className="mt-4 flex space-x-2">
+                <button onClick={handleAddPlayer} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                  Save Player
+                </button>
+                <button onClick={() => setShowAddForm(false)} className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="grid gap-4">
+            {filteredPlayers.map(player => (
+              <div key={player.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    {player.number}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-lg">{player.name}</p>
+                    <p className="text-gray-500">{player.position}</p>
+                  </div>
+                </div>
+                <div className="md:text-right">
+                  <p className="font-medium">{player.parent}</p>
+                  <p className="text-sm text-gray-500">{player.phone}</p>
+                  <p className="text-sm text-blue-600">{player.email}</p>
+                </div>
+                <button
+                  onClick={() => setPlayers(players.filter(p => p.id !== player.id))}
+                  className="text-red-500 hover:text-red-700 text-sm self-end md:self-center"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // Main App Component
+    function App() {
+      const [currentPage, setCurrentPage] = useState('dashboard');
+      const [team] = useState(initialTeamData);
+      const [players, setPlayers] = useState(initialPlayers);
+      const [schedule, setSchedule] = useState(initialSchedule);
+      const [carpools, setCarpools] = useState(initialCarpools);
+      const [volunteers, setVolunteers] = useState(initialVolunteerDuties);
+
+      const renderPage = () => {
+        switch(currentPage) {
+          case 'dashboard':
+            return <Dashboard team={team} schedule={schedule} carpools={carpools} volunteers={volunteers} players={players} />;
+          case 'schedule':
+            return <Schedule schedule={schedule} setSchedule={setSchedule} />;
+          case 'carpool':
+            return <Carpool schedule={schedule} carpools={carpools} setCarpools={setCarpools} players={players} />;
+          case 'volunteers':
+            return <Volunteers schedule={schedule} volunteers={volunteers} setVolunteers={setVolunteers} players={players} />;
+          case 'roster':
+            return <Roster players={players} setPlayers={setPlayers} />;
+          default:
+            return <Dashboard team={team} schedule={schedule} carpools={carpools} volunteers={volunteers} players={players} />;
+        }
+      };
+
+      return (
+        <div className="min-h-screen bg-gray-50">
+          <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
+          <main className="max-w-7xl mx-auto px-4 py-6">
+            {renderPage()}
+          </main>
+          <footer className="text-center py-6 text-gray-400 text-sm">
+            TeamUp - Youth Soccer Team Manager
+          </footer>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
